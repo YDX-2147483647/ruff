@@ -20,6 +20,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
+#[allow(clippy::print_stderr)]
 fn main() -> Result<(), Error> {
     let mut args = pico_args::Arguments::from_env();
 
@@ -36,6 +37,7 @@ OPTIONS:
     --help                      Prints this help
         "#
         );
+        return Ok(());
     }
 
     let mut tools = Vec::new();

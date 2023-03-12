@@ -45,7 +45,7 @@ fn benchmark_linter(criterion: &mut Criterion, cases: &[TestCase]) {
                     flags::Noqa::Enabled,
                     flags::Autofix::Enabled,
                 )
-            })
+            });
         });
     }
 

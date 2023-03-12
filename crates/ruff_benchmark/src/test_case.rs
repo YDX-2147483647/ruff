@@ -73,31 +73,29 @@ impl TestFile {
         Self { name, code }
     }
 
+    #[allow(clippy::print_stderr)]
     pub fn try_download(name: &str, url: &str) -> Result<TestFile, TestFileDownloadError> {
         let url = Url::parse(url)?;
 
         let cached_filename = Path::new("target").join(name);
 
-        match std::fs::read_to_string(&cached_filename) {
-            Ok(content) => Ok(TestFile::new(name.to_string(), content)),
-            Err(_) => {
-                // File not yet cached, download and cache it in the target directory
-                let response = ureq::get(url.as_str()).call()?;
+        if let Ok(content) = std::fs::read_to_string(&cached_filename) {
+            Ok(TestFile::new(name.to_string(), content))
+        } else {
+            // File not yet cached, download and cache it in the target directory
+            let response = ureq::get(url.as_str()).call()?;
 
-                let content = response.into_string()?;
+            let content = response.into_string()?;
 
-                // SAFETY: There's always the `target` directory
-                let parent = cached_filename.parent().unwrap();
-                if let Err(error) = std::fs::create_dir_all(parent) {
-                    eprintln!("Failed to crate the directory for the test case {name}: {error}")
-                } else if let Err(error) = std::fs::write(cached_filename, &content) {
-                    {
-                        eprintln!("Failed to cache test case file downloaded from {url}: {error}")
-                    }
-                }
-
-                Ok(TestFile::new(name.to_string(), content))
+            // SAFETY: There's always the `target` directory
+            let parent = cached_filename.parent().unwrap();
+            if let Err(error) = std::fs::create_dir_all(parent) {
+                eprintln!("Failed to crate the directory for the test case {name}: {error}");
+            } else if let Err(error) = std::fs::write(cached_filename, &content) {
+                eprintln!("Failed to cache test case file downloaded from {url}: {error}");
             }
+
+            Ok(TestFile::new(name.to_string(), content))
         }
     }
 }
@@ -105,7 +103,7 @@ impl TestFile {
 #[derive(Debug)]
 pub enum TestFileDownloadError {
     UrlParse(url::ParseError),
-    Request(ureq::Error),
+    Request(Box<ureq::Error>),
     Download(std::io::Error),
 }
 
@@ -117,7 +115,7 @@ impl From<url::ParseError> for TestFileDownloadError {
 
 impl From<ureq::Error> for TestFileDownloadError {
     fn from(value: ureq::Error) -> Self {
-        Self::Request(value)
+        Self::Request(Box::new(value))
     }
 }
 
