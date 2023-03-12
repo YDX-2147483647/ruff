@@ -34,6 +34,7 @@ OPTIONS:
     --tool=<linter>             The tool to benchmark.
     --save-baseline=<name>      Names an explicit baseline and enables overwriting the previous results.
     --retain-baseline=<name>    Names an explicit baseline and disables overwriting the previous results.
+    --filter=<name>             Only runs test cases that match filter
     --help                      Prints this help
         "#
         );
@@ -61,12 +62,18 @@ OPTIONS:
         criterion = criterion.retain_baseline(retain_baseline, true);
     }
 
+    let filter: Option<String> = args.opt_value_from_str("--filter")?;
+
     let remaining = args.finish();
     if !remaining.is_empty() {
         return Err(Error::Unsupported(remaining));
     }
 
-    let test_cases = create_test_cases()?;
+    let mut test_cases = create_test_cases()?;
+
+    if let Some(filter) = filter {
+        test_cases.retain(|case| case.name().contains(&filter))
+    };
 
     for tool in tools {
         tool.benchmark(&mut criterion, &test_cases);
