@@ -31,9 +31,9 @@ fn benchmark_linter(criterion: &mut Criterion, cases: &[TestCase]) {
     for case in cases {
         group.throughput(Throughput::Bytes(case.code().len() as u64));
         group.measurement_time(match case.speed() {
-            TestCaseSpeed::Fast => Duration::from_secs(10),
-            TestCaseSpeed::Normal => Duration::from_secs(20),
-            TestCaseSpeed::Slow => Duration::from_secs(30),
+            TestCaseSpeed::Fast => Duration::from_secs(5),
+            TestCaseSpeed::Normal => Duration::from_secs(10),
+            TestCaseSpeed::Slow => Duration::from_secs(20),
         });
         group.bench_with_input(BenchmarkId::from_parameter(case.name()), case, |b, case| {
             b.iter(|| {

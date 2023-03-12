@@ -1,6 +1,7 @@
 use criterion::Criterion;
 use ruff_benchmark::test_case::{TestCase, TestFile, TestFileDownloadError};
 use ruff_benchmark::Tool;
+use std::ffi::OsString;
 use std::fmt::{Debug, Display, Formatter};
 
 #[cfg(target_os = "windows")]
@@ -29,9 +30,10 @@ Ruff Microbenchmarks
 Usage:
     cargo benchmark [options]
 OPTIONS:
-    --tool=<linter>         The tool to benchmark.
-    --save-baseline=name    Stores the benchmark results under the given name so that you can compare them with `critcmp`
-    --help                  Prints this help
+    --tool=<linter>             The tool to benchmark.
+    --save-baseline=<name>      Names an explicit baseline and enables overwriting the previous results.
+    --retain-baseline=<name>    Names an explicit baseline and disables overwriting the previous results.
+    --help                      Prints this help
         "#
         );
     }
@@ -46,9 +48,20 @@ OPTIONS:
         tools.extend(Tool::all());
     }
 
-    let mut criterion = Criterion::default().without_plots();
+    let mut criterion = Criterion::default()
+        .without_plots()
+        .with_output_color(supports_color::on(supports_color::Stream::Stdout).is_some());
     if let Some(baseline) = args.opt_value_from_str("--save-baseline")? {
         criterion = criterion.save_baseline(baseline);
+    }
+
+    if let Some(retain_baseline) = args.opt_value_from_str("--retain-baseline")? {
+        criterion = criterion.retain_baseline(retain_baseline, true);
+    }
+
+    let remaining = args.finish();
+    if !remaining.is_empty() {
+        return Err(Error::Unsupported(remaining));
     }
 
     let test_cases = create_test_cases()?;
@@ -57,7 +70,7 @@ OPTIONS:
         tool.benchmark(&mut criterion, &test_cases);
     }
 
-    drop(criterion);
+    criterion.final_summary();
 
     Ok(())
 }
@@ -66,6 +79,7 @@ OPTIONS:
 pub enum Error {
     Download(TestFileDownloadError),
     Args(pico_args::Error),
+    Unsupported(Vec<OsString>),
 }
 
 impl From<pico_args::Error> for Error {
@@ -85,6 +99,9 @@ impl Display for Error {
         match self {
             Error::Download(error) => std::fmt::Display::fmt(error, f),
             Error::Args(error) => std::fmt::Display::fmt(error, f),
+            Error::Unsupported(arguments) => {
+                write!(f, "Unsupported arguments: '{arguments:?}'")
+            }
         }
     }
 }

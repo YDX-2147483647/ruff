@@ -12,7 +12,8 @@ description = "Ruff Micro-benchmarks"
 [dependencies]
 criterion = { version = "0.4.0", default-features = false}
 ruff.path = "../ruff"
-pico-args = "0.5.0"
+pico-args = { version = "0.5.0", features = ["eq-separator"] }
+supports-color = "2.0.0"
 url = "2.3.1"
 ureq = "2.6.2"
 
