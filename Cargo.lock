@@ -1122,7 +1122,7 @@ dependencies = [
  "itertools",
  "lalrpop-util",
  "petgraph",
- "pico-args",
+ "pico-args 0.4.2",
  "regex",
  "regex-syntax",
  "string_cache",
@@ -1644,6 +1644,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db8bcd96cb740d03149cbad5518db9fd87126a10ab519c011893b1754134c468"
 
 [[package]]
+name = "pico-args"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315"
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2001,6 +2007,19 @@ dependencies = [
  "textwrap",
  "thiserror",
  "toml",
+]
+
+[[package]]
+name = "ruff_benchmark"
+version = "0.0.0"
+dependencies = [
+ "criterion",
+ "mimalloc",
+ "pico-args 0.5.0",
+ "ruff",
+ "tikv-jemallocator",
+ "ureq",
+ "url",
 ]
 
 [[package]]
