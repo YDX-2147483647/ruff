@@ -57,3 +57,8 @@ def foo3():
 
 def foo4():
     ...
+
+
+def foo5():
+    object().__class__  # Attribute (raise)
+    "foo" + "bar"  # BinOp (raise)

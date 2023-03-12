@@ -130,6 +130,23 @@ pub fn contains_effect(ctx: &Context, expr: &Expr) -> bool {
             }
         }
 
+        // Avoid false positive for overloaded operators.
+        if let ExprKind::BinOp { left, right, .. } = &expr.node {
+            if !matches!(
+                left.node,
+                ExprKind::Constant { .. } | ExprKind::JoinedStr { .. }
+            ) {
+                return true;
+            }
+            if !matches!(
+                right.node,
+                ExprKind::Constant { .. } | ExprKind::JoinedStr { .. }
+            ) {
+                return true;
+            }
+            return false;
+        }
+
         // Otherwise, avoid all complex expressions.
         matches!(
             expr.node,

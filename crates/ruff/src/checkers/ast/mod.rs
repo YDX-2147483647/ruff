@@ -420,10 +420,6 @@ where
                     pyupgrade::rules::functools_cache(self, decorator_list);
                 }
 
-                if self.settings.rules.enabled(&Rule::UselessExpression) {
-                    flake8_bugbear::rules::useless_expression(self, body);
-                }
-
                 if self.settings.rules.enabled(&Rule::CachedInstanceMethod) {
                     flake8_bugbear::rules::cached_instance_method(self, decorator_list);
                 }
@@ -754,10 +750,6 @@ where
                     ) {
                         self.diagnostics.push(diagnostic);
                     }
-                }
-
-                if self.settings.rules.enabled(&Rule::UselessExpression) {
-                    flake8_bugbear::rules::useless_expression(self, body);
                 }
 
                 if !self.is_stub {
@@ -1885,6 +1877,9 @@ where
             StmtKind::Expr { value, .. } => {
                 if self.settings.rules.enabled(&Rule::UselessComparison) {
                     flake8_bugbear::rules::useless_comparison(self, value);
+                }
+                if self.settings.rules.enabled(&Rule::UselessExpression) {
+                    flake8_bugbear::rules::useless_expression(self, value);
                 }
                 if self
                     .settings
